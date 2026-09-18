@@ -6,7 +6,9 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "spinlock.h"
 volatile int shared_counter = 0;
+struct spinlock counter_lock;
 int
 sys_fork(void)
 {
@@ -95,12 +97,14 @@ sys_increment_counter(void)
   int temp;
   int i;
 
+  acquire(&counter_lock);
   temp = shared_counter;
 
   for(i = 0; i < 100000; i++) asm volatile("nop");
     ;
 
   shared_counter = temp + 1;
+  release(&counter_lock);
 
   return shared_counter;
 }
