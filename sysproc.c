@@ -6,7 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-
+volatile int shared_counter = 0;
 int
 sys_fork(void)
 {
@@ -88,4 +88,25 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+int
+sys_increment_counter(void)
+{
+  int temp;
+  int i;
+
+  temp = shared_counter;
+
+  for(i = 0; i < 100000; i++) asm volatile("nop");
+    ;
+
+  shared_counter = temp + 1;
+
+  return shared_counter;
+}
+
+int
+sys_get_counter(void)
+{
+  return shared_counter;
 }
